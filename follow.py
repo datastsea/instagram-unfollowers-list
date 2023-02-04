@@ -9,8 +9,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-TIME_WAIT = 60
-TIME_SLEEP = 3
+TIME_WAIT = 3
 INSTAGRAM_URL = 'https://www.instagram.com'
 
 
@@ -26,7 +25,7 @@ def get_follow_list(driver: WebDriver, id: str, tag: str) -> list:
     """
     # Move to Follow Page
     driver.get(INSTAGRAM_URL + f'/{id}/{tag}/')
-    time.sleep(TIME_SLEEP)
+    time.sleep(TIME_WAIT)
     
     # Scroll Down to Get Follow List
     old_height, new_height = 0, 1
@@ -34,7 +33,7 @@ def get_follow_list(driver: WebDriver, id: str, tag: str) -> list:
     while old_height != new_height:
         old_height = driver.execute_script(f'return {dialog_element}.scrollHeight')
         driver.execute_script(f'{dialog_element}.scrollTo(0, {dialog_element}.scrollHeight)')
-        time.sleep(TIME_SLEEP)
+        time.sleep(TIME_WAIT)
         new_height = driver.execute_script(f'return {dialog_element}.scrollHeight')
     
     # Parsing
@@ -48,12 +47,17 @@ def get_follow_list(driver: WebDriver, id: str, tag: str) -> list:
 
 def main(driver: WebDriver, id: str, pw: str):
     ## Login
-    # TODO: 로그인 실패시 프로그램 종료
     driver.get(INSTAGRAM_URL)
     driver.find_element(by=By.NAME, value='username').send_keys(id)
     driver.find_element(by=By.NAME, value='password').send_keys(pw)
     driver.find_element(by=By.XPATH, value='//*[@id="loginForm"]/div[1]/div[3]/button').submit()
-    driver.find_element(by=By.XPATH, value='//main/div/div/div/div/button').click() # Click Later Button
+
+    try:
+        driver.find_element(by=By.ID, value='slfErrorAlert')
+        print('Invalid ID or password')
+        return
+    except:
+        driver.find_element(by=By.XPATH, value='//main/div/div/div/div/button').click() # Click Later Button
     
     ## Get List
     followers_list = get_follow_list(driver, id, 'followers')
@@ -66,7 +70,9 @@ def main(driver: WebDriver, id: str, pw: str):
 
 
 if __name__ == '__main__':
-    # TODO: sys 인자 값 미 입력시 프로그램 종료
+    if len(sys.argv) != 3:
+        print('Usage: python follow.py <ID> <PASSWORD>')
+        exit(1)
 
     ## Connect Driver
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))

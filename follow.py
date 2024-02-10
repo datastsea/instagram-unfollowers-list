@@ -9,7 +9,9 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.webdriver import WebDriver
 from webdriver_manager.chrome import ChromeDriverManager
 
-TIME_WAIT = 3
+TIME_WAIT = 10
+
+CHROME_DRIVER_PATH = './driver/121/chromedriver'
 INSTAGRAM_URL = 'https://www.instagram.com'
 
 
@@ -57,7 +59,7 @@ def main(driver: WebDriver, id: str, pw: str):
         print('Invalid ID or password')
         return
     except:
-        driver.find_element(by=By.XPATH, value='//main/div/div/div/div/button').click() # Click Later Button
+        driver.find_element(by=By.XPATH, value='//main/div/div/div/div/div').click() # Click Later Button
     
     ## Get List
     followers_list = get_follow_list(driver, id, 'followers')
@@ -75,7 +77,8 @@ if __name__ == '__main__':
         exit(1)
 
     ## Connect Driver
-    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
+    # driver = webdriver.Chrome(service=Service(ChromeDriverManager().install())) # automatic
+    driver = webdriver.Chrome(executable_path=CHROME_DRIVER_PATH) # manual
     driver.implicitly_wait(TIME_WAIT)
 
     main(driver, sys.argv[1], sys.argv[2])

@@ -11,7 +11,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 TIME_WAIT = 10
 
-CHROME_DRIVER_PATH = './driver/121/chromedriver'
+CHROME_DRIVER_PATH = './driver/126/chromedriver'
 INSTAGRAM_URL = 'https://www.instagram.com'
 
 
@@ -26,12 +26,19 @@ def get_follow_list(driver: WebDriver, id: str, tag: str) -> list:
             팔로우 list 반환
     """
     # Move to Follow Page
-    driver.get(INSTAGRAM_URL + f'/{id}/{tag}/')
+    driver.get(INSTAGRAM_URL + f'/{id}/')
+
+    if tag == "followers":
+        driver.find_elements(by=By.CLASS_NAME, value="_alvs")[0].click()
+    elif tag == "following":
+        driver.find_elements(by=By.CLASS_NAME, value="_alvs")[1].click()
+    else:
+        raise Exception("Not found follow button!")
     time.sleep(TIME_WAIT)
     
     # Scroll Down to Get Follow List
     old_height, new_height = 0, 1
-    dialog_element = "document.getElementsByClassName('_aano')[0]"
+    dialog_element = "document.getElementsByClassName('_ap3a')[0]"
     while old_height != new_height:
         old_height = driver.execute_script(f'return {dialog_element}.scrollHeight')
         driver.execute_script(f'{dialog_element}.scrollTo(0, {dialog_element}.scrollHeight)')
